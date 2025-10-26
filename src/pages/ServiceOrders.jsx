@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getOrders } from "../helpers/ordersService";
+import ModalOrderForm from "../components/ModalOrderForm";
 
 const dummyOrders = [
     {
@@ -34,12 +36,32 @@ const dummyOrders = [
 ];
 
 export default function ServiceOrders() {
+
+    const [open, setOpen] = useState(false);
+
+    const [orders, setOrders] = useState([]);
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const data = await getOrders();
+                console.log()
+                setOrders(data);
+            } catch (err) {
+                console.error("No se pudieron cargar las órdenes:", err);
+            }
+        };
+
+        fetchOrders();
+    }, []);
+
     const [search, setSearch] = useState("");
 
-    const filtered = dummyOrders.filter(
+    const filtered = orders.filter(
         (o) =>
-            o.id.toLowerCase().includes(search.toLowerCase()) ||
-            o.nombre.toLowerCase().includes(search.toLowerCase())
+            o.folio.toLowerCase().includes(search.toLowerCase()) ||
+            o.cliente.nombre.toLowerCase().includes(search.toLowerCase()) ||
+            o.fecha.toLowerCase().includes(search.toLowerCase())
     );
 
     const paymentIcon = (tipo) => {
@@ -55,6 +77,35 @@ export default function ServiceOrders() {
         }
     };
 
+    const handleDescargarPDF = async (folio) => {
+        try {
+            const response = await fetch(`http://localhost:4000/api/descargar-pdf/${folio}`, {
+                method: "GET",
+            });
+
+            if (!response.ok) {
+                throw new Error("No se pudo descargar el PDF");
+            }
+
+            // Convertir la respuesta a blob (archivo binario)
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            // Crear enlace temporal para descargar
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `orden-${folio}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpiar el objeto URL temporal
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(error);
+            alert("Error al descargar el PDF");
+        }
+    }
     return (
         <div className="p-4">
             {/* Búsqueda */}
@@ -65,6 +116,18 @@ export default function ServiceOrders() {
                     className="w-full md:w-1/3 px-3 py-2 border rounded-lg"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                />
+                <button
+                    onClick={() => setOpen(true)}
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                >
+                    + Nueva Orden
+                </button>
+
+                <ModalOrderForm
+                    isOpen={open}
+                    onClose={() => setOpen(false)}
+                    onSuccess={() => alert("Orden creada exitosamente")}
                 />
             </div>
 
@@ -78,7 +141,7 @@ export default function ServiceOrders() {
                         <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                                 <div className="font-semibold"># Servicio</div>
-                                <div>{o.id}</div>
+                                <div>{o.folio}</div>
                             </div>
                             <div>
                                 <div className="font-semibold">Fecha</div>
@@ -87,7 +150,7 @@ export default function ServiceOrders() {
 
                             <div>
                                 <div className="font-semibold">Nombre</div>
-                                <div>{o.nombre}</div>
+                                <div>{o.cliente.nombre}</div>
                             </div>
                             <div>
                                 <div className="font-semibold">Teléfono</div>
@@ -96,11 +159,11 @@ export default function ServiceOrders() {
 
                             <div>
                                 <div className="font-semibold">Dirección</div>
-                                <div>{o.direccion}</div>
+                                <div>{o.cliente.direccion}</div>
                             </div>
                             <div>
                                 <div className="font-semibold">Taller</div>
-                                <div>{o.taller}</div>
+                                <div>{o.cliente.taller}</div>
                             </div>
 
                             <div>
@@ -109,7 +172,7 @@ export default function ServiceOrders() {
                             </div>
                             <div>
                                 <div className="font-semibold">Servicio</div>
-                                <div>{o.tipoServicio}</div>
+                                <div>{o.servicio}</div>
                             </div>
 
                             <div>
@@ -118,7 +181,7 @@ export default function ServiceOrders() {
                             </div>
                             <div>
                                 <div className="font-semibold">Pago</div>
-                                <div>{o.tipoPago} {paymentIcon(o.tipoPago)}</div>
+                                <div>{o.pago} {paymentIcon(o.pago)}</div>
                             </div>
 
                             <div>
@@ -127,7 +190,7 @@ export default function ServiceOrders() {
                             </div>
                             <div>
                                 <div className="font-semibold">Mano de obra</div>
-                                <div>${o.costoManoObra}</div>
+                                <div>${o.manoDeObra}</div>
                             </div>
 
                             <div>
@@ -138,12 +201,13 @@ export default function ServiceOrders() {
 
                         {/* Botones de acción */}
                         <div className="flex gap-2 pt-2">
-                            <button className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm">
-                                Editar
+                            <button onClick={() => handleDescargarPDF(o.folio)}
+                                className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm">
+                                Descargar PDF
                             </button>
-                            <button className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm">
+                            {/* <button className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm">
                                 Eliminar
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                 ))}
@@ -151,6 +215,7 @@ export default function ServiceOrders() {
 
 
             {/* Tabla desktop */}
+
             <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full border">
                     <thead className="bg-gray-100">
@@ -174,27 +239,28 @@ export default function ServiceOrders() {
                     <tbody>
                         {filtered.map((o) => (
                             <tr key={o.id} className="text-sm">
-                                <td className="p-2 border">{o.id}</td>
+                                <td className="p-2 border">{o.folio}</td>
                                 <td className="p-2 border">{o.fecha}</td>
                                 <td className="p-2 border">{o.taller}</td>
                                 <td className="p-2 border">{o.tecnico}</td>
-                                <td className="p-2 border">{o.nombre}</td>
-                                <td className="p-2 border">{o.telefono}</td>
-                                <td className="p-2 border">{o.direccion}</td>
-                                <td className="p-2 border">{o.tipoServicio}</td>
+                                <td className="p-2 border">{o.cliente.nombre}</td>
+                                <td className="p-2 border">{o.cliente.telefono}</td>
+                                <td className="p-2 border">{o.cliente.direccion}</td>
+                                <td className="p-2 border">{o.servicio}</td>
                                 <td className="p-2 border">{o.material}</td>
-                                <td className="p-2 border text-center">{paymentIcon(o.tipoPago)}</td>
+                                <td className="p-2 border text-center">{paymentIcon(o.pago)}</td>
                                 <td className="p-2 border">${o.costoMaterial}</td>
-                                <td className="p-2 border">${o.costoManoObra}</td>
+                                <td className="p-2 border">${o.manoDeObra}</td>
                                 <td className="p-2 border font-bold">${o.total}</td>
                                 <td className="p-2 border">
                                     <div className="flex gap-2">
-                                        <button className="px-2 py-1 bg-blue-500 text-white rounded text-xs">
-                                            Editar
+                                        <button onClick={() => handleDescargarPDF(o.folio)}
+                                            className="px-2 py-1 bg-blue-500 text-white rounded text-xs">
+                                            Descargar PDF
                                         </button>
-                                        <button className="px-2 py-1 bg-red-500 text-white rounded text-xs">
+                                        {/* <button className="px-2 py-1 bg-red-500 text-white rounded text-xs">
                                             Eliminar
-                                        </button>
+                                        </button> */}
                                     </div>
                                 </td>
                             </tr>

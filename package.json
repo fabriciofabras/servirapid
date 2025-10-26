@@ -12,6 +12,11 @@
   "dependencies": {
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
+    "axios": "^1.12.2",
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "fs": "^0.0.1-security",
+    "pdfkit": "^0.17.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4"
