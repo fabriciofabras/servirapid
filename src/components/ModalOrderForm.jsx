@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { addOrder } from "../helpers/ordersService";
+import FirmaDigital from "./FirmaDigital";
+import { Button, Modal } from "react-bootstrap";
 
 export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
+
+    const [showFirma, setShowFirma] = useState(false);
+
     const [form, setForm] = useState({
         folio: "",
         fecha: "",
@@ -14,7 +19,14 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         costoMaterial: null,
         manoDeObra: null,
         total: null,
+        firma: null
     });
+
+    const handleGuardarFirma = (dataURL) => {
+        console.log(dataURL)
+        setForm((prev) => ({ ...prev, firma: dataURL }));
+        setShowFirma(false);
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -41,7 +53,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         }
 
         try {
-            const res = await fetch("http://localhost:4000/api/generar-pdf", {
+            const res = await fetch("https://servirapid-server-123.vercel.app/api/generar-pdf", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
@@ -60,17 +72,45 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-lg">
-                <h2 className="text-2xl font-semibold mb-4 text-gray-800">Nueva Orden</h2>
-
-                <form onSubmit={handleSubmit} className="space-y-3">
-                    <div className="grid grid-cols-4 gap-3">
-                        <input name="folio" placeholder="Folio" value={form.folio} onChange={handleChange} className="input mb-2" />
-                        <input name="fecha" type="date" value={form.fecha} onChange={handleChange} className="input mb-2" />
-                        <input name="taller" placeholder="Taller" value={form.taller} onChange={handleChange} className="input mb-2" />
-                        {/*                         <input name="tecnico" placeholder="Técnico" value={form.tecnico} onChange={handleChange} className="input mb-2" />
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto p-4 md:rounded-2xl md:w-[600px] md:mx-auto md:mt-10">
+            <div className="flex justify-between items-center border-b pb-2">
+                {/*                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">Nueva Orden</h2>
  */}
+
+                {/* Modal de firma */}
+                {showFirma && (
+                    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+                        <div className="bg-white rounded-xl shadow-lg p-6 w-[90%] max-w-lg relative">
+                            <button
+                                type="button"
+                                className="absolute top-2 right-3 text-gray-500 hover:text-gray-700 text-xl"
+                                onClick={() => setShowFirma(false)}
+                            >
+                                ✕
+                            </button>
+                            <h2 className="text-lg font-semibold mb-3 text-center">
+                                Firma del cliente
+                            </h2>
+                            <FirmaDigital onGuardarFirma={handleGuardarFirma} />
+                        </div>
+                    </div>
+                )}
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className="p-3 border rounded-lg bg-gray-50">
+                        <h3 className="text-sm font-semibold text-gray-600 mb-2">Datos de la orden</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label>Folio</label>
+
+                            <input name="folio" value={form.folio} onChange={handleChange} className="input mb-2" />
+                            <label>Fecha</label>
+
+                            <input name="fecha" type="date" value={form.fecha} onChange={handleChange} className="input mb-2" />
+                            <label>Taller</label>
+
+                            <input name="taller" value={form.taller} onChange={handleChange} className="input mb-2" />
+                            {/*                         <input name="tecnico" placeholder="Técnico" value={form.tecnico} onChange={handleChange} className="input mb-2" />
+ */}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
@@ -78,20 +118,19 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
 
                     <div className="p-3 border rounded-lg bg-gray-50">
                         <h3 className="text-sm font-semibold text-gray-600 mb-2">Datos del Cliente</h3>
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <label>Nombre</label>
                             <input name="cliente.nombre" value={form.cliente.nombre} onChange={handleChange} className="input mb-2" />
                             <label>Teléfono:</label>
 
-                            <input name="cliente.telefono" placeholder="Teléfono" value={form.cliente.telefono} onChange={handleChange} className="input mb-2" />
+                            <input name="cliente.telefono" value={form.cliente.telefono} onChange={handleChange} className="input mb-2" />
                             <label>Dirección:</label>
 
-                            <input name="cliente.direccion" placeholder="Dirección" value={form.cliente.direccion} onChange={handleChange} className="input mb-2" />
-                            <label>tipo de ID:</label>
+                            <input name="cliente.direccion" value={form.cliente.direccion} onChange={handleChange} className="input mb-2" />
+                            <label>Tipo de id:</label>
 
                             <input
                                 name="cliente.tipoId"
-                                placeholder="Tipo de ID"
                                 value={form.cliente.tipoId || ""}
                                 onChange={handleChange}
                                 className="input mb-2" required
@@ -102,7 +141,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                     {/* Horarios */}
                     <div className="p-3 border rounded-lg bg-gray-50">
                         <h3 className="text-sm font-semibold text-gray-600 mb-2">Horarios</h3>
-                        <div className="grid grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <label>Hora asignación:</label>
                             <input
                                 name="horaAsignacion"
@@ -162,7 +201,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                         </select>
                         {/* Campos adicionales si es Auto */}
                         {form.trabajo === "Auto" && (
-                            <div className="grid grid-cols-4 gap-3">
+                            <div className="grid grid-cols-2 sm-grid-cols-4 gap-3">
                                 <label>Placas:</label>
                                 <input
                                     name="auto.placas"
@@ -211,17 +250,30 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
 
                     <div className="p-3 border rounded-lg bg-gray-50">
                         <h3 className="text-sm font-semibold text-gray-600 mb-2">Servicio</h3>
-                        <div className="grid grid-cols-4 gap-3">
-                            <input name="servicio" placeholder="Servicio" value={form.servicio} onChange={handleChange} className="input" />
-                            <input name="material" placeholder="Material" value={form.material} onChange={handleChange} className="input" />
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label>Servicio</label>
+
+                            <input name="servicio" value={form.servicio} onChange={handleChange} className="input" />
+                            <label>Material</label>
+
+                            <input name="material" value={form.material} onChange={handleChange} className="input" />
                             <select name="pago" value={form.pago} onChange={handleChange} className="input">
                                 <option value="">Método de pago</option>
                                 <option value="💵">Efectivo</option>
                                 <option value="💳">Tarjeta</option>
                             </select>
-                            <input name="costoMaterial" type="number" placeholder="Costo Material" value={form.costoMaterial} onChange={handleChange} className="input" />
-                            <input name="manoDeObra" type="number" placeholder="Mano de obra" value={form.manoDeObra} onChange={handleChange} className="input" />
-                            <input name="total" type="number" placeholder="Total" value={form.total} onChange={handleChange} className="input" />
+                            <div>
+
+                            </div>
+                            <label>Costo Material</label>
+
+                            <input name="costoMaterial" type="number" value={form.costoMaterial} onChange={handleChange} className="input" />
+                            <label>Mano de obra</label>
+
+                            <input name="manoDeObra" type="number" value={form.manoDeObra} onChange={handleChange} className="input" />
+                            <label>Total</label>
+
+                            <input name="total" type="number" value={form.total} onChange={handleChange} className="input" />
 
                         </div>
 
@@ -238,6 +290,25 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                             rows="3"
                         />
                     </div>
+                    {/* Botón para abrir firma */}
+                    <div className="mt-4 flex items-center gap-4">
+                        <button
+                            type="button"
+                            onClick={() => setShowFirma(true)}
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all"
+                        >
+                            {form.firma ? "Ver / Editar firma" : "Firmar orden"}
+                        </button>
+
+                        {form.firma && (
+                            <img
+                                src={form.firma}
+                                alt="Firma previa"
+                                className="w-24 border border-gray-400 rounded-md"
+                            />
+                        )}
+                    </div>
+
 
                     {/* Calidad del servicio */}
                     <div>

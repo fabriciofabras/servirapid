@@ -79,7 +79,7 @@ export default function ServiceOrders() {
 
     const handleDescargarPDF = async (folio) => {
         try {
-            const response = await fetch(`http://localhost:4000/api/descargar-pdf/${folio}`, {
+            const response = await fetch(`https://servirapid-server-123.vercel.app/api/descargar-pdf/${folio}`, {
                 method: "GET",
             });
 
