@@ -53,7 +53,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         }
 
         try {
-            const res = await fetch("https://servirapid-server-123.vercel.app/api/generar-pdf", {
+            const res = await fetch("https://servirapid-server.vercel.app/api/generar-pdf", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
