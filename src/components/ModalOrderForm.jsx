@@ -13,6 +13,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         taller: "",
         tecnico: "",
         cliente: { nombre: "", telefono: "", direccion: "" },
+        auto: { placas: "", noSerie: "", marca: "", tipoAuto: "" },
         servicio: "",
         material: "",
         pago: "",
@@ -31,16 +32,22 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        if (name.startsWith("cliente.")) {
-            const field = name.split(".")[1];
+        // Si el nombre tiene punto, es un campo anidado (ej. cliente.nombre o auto.placas)
+        if (name.includes(".")) {
+            const [parent, field] = name.split(".");
             setForm((prev) => ({
                 ...prev,
-                cliente: { ...prev.cliente, [field]: value },
+                [parent]: {
+                    ...prev[parent],
+                    [field]: value,
+                },
             }));
         } else {
+            // Si no tiene punto, es un campo normal
             setForm((prev) => ({ ...prev, [name]: value }));
         }
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
