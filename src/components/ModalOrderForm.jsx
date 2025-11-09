@@ -4,6 +4,8 @@ import FirmaDigital from "./FirmaDigital";
 import { Button, Modal } from "react-bootstrap";
 
 export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "https://servirapid-server.vercel.app";
+
 
     const baseInput =
         "w-full border border-gray-300 rounded-lg p-2.5 bg-gray-50 text-gray-900 " +
@@ -13,13 +15,21 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
 
     const [showFirma, setShowFirma] = useState(false);
     const [showFirmaTecnico, setShowFirmaTecnico] = useState(false);
+    const [imagenes, setImagenes] = useState([]); // archivos seleccionados
+
+    const handleImageChange = (e) => {
+        // convierte FileList en array
+        const files = Array.from(e.target.files);
+        setImagenes(files);
+    };
+
 
     const [form, setForm] = useState({
         folio: "",
         fecha: "",
         taller: "alamos",
         tecnico: "rodrigo",
-        cliente: { nombre: "", tipoId:"",telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "" },
+        cliente: { nombre: "", tipoId: "", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "" },
         auto: { placas: "", noSerie: "", marca: "", tipoAuto: "" },
         trabajo: "hogar",
         servicio: "",
@@ -30,8 +40,35 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         total: null,
         firma: null,
         firmaTecnico: null,
-        observaciones: ""
+        observaciones: "",
+        imagenes: []
+
     });
+
+   /*  const [form, setForm] = useState({
+        folio: "",
+        fecha: "2024-12-12",
+        taller: "Álamos",
+        tecnico: "Rodrigo Esquivel Bejarano",
+        cliente: { nombre: "Luis", tipoId: "INE", telefono: "5565656565", calle: "Tokio", noExterior: "303", noInterior: "6", colonia: "Portales Norte", alcaldia: "Benito Juárez" },
+        auto: { placas: "fhs12355", noSerie: "oiwjwd", marca: "ford", tipoAuto: "sedan", anio: "2024" },
+        trabajo: "hogar",
+        servicio: "2dad",
+        material: "sdas",
+        pago: "efectivo",
+        costoMaterial: 1000,
+        manoDeObra: 2000,
+        total: 3000,
+        firma: null,
+        firmaTecnico: null,
+        observaciones: "123",
+        horaAsignacion: "08:30",
+        horaTermino: "08:30",
+        horaContacto: "08:30",
+        fechaTermino: "2024-12-12",
+        calidadServicio: "Excelente",
+        imagenes: []
+    }); */
 
     const handleGuardarFirma = (dataURL) => {
         console.log(dataURL)
@@ -66,30 +103,47 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            await addOrder(form);
-            onSuccess();
-            onClose();
-        } catch (error) {
-            console.error("Error al crear orden:", error);
-        }
 
+        const data = new FormData();
+
+        // === 1️⃣ Campos de nivel superior (excepto los objetos e imágenes)
+        Object.entries(form).forEach(([key, value]) => {
+            if (key !== "imagenes" && key !== "cliente" && key !== "auto") {
+                // si es null o undefined, no lo agregamos
+                if (value !== null && value !== undefined) {
+                    data.append(key, value);
+                }
+            }
+        });
+
+        // === 2️⃣ Agregar los objetos anidados
+        data.append("cliente", JSON.stringify(form.cliente));
+        data.append("auto", JSON.stringify(form.auto));
+
+        // === 3️⃣ Agregar las imágenes (si hay)
+        if (form.imagenes && form.imagenes.length > 0) {
+            form.imagenes.forEach((file) => {
+                data.append("imagenes", file);
+            });
+        }
         try {
-            const res = await fetch("https://servirapid-server.vercel.app/api/generar-pdf", {
+
+            // 2️⃣ Genera el PDF
+            await fetch(`${API_BASE_URL}/api/generar-pdf`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
+/*                 headers: { "Content-Type": "application/json" },
+ */                body: data,
             });
 
-            const data = await res.json();
-            console.log("PDF generado:", data);
-
-            if (onSuccess) onSuccess();
+            // 3️⃣ Cierra modal y refresca una sola vez
+            // ✅ Primero refresca los datos, luego cierra el modal
+            if (onSuccess) await onSuccess();
             onClose();
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error al crear orden o generar PDF:", error);
         }
     };
+
 
     if (!isOpen) return null;
 
@@ -174,8 +228,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     className={baseInput}
                                     required
                                 >
-                                    <option value="alamos">Álamos</option>
-                                    <option value="echegaray">Echegaray</option>
+                                    <option value="Álamos">Álamos</option>
+                                    <option value="Echegaray">Echegaray</option>
 
                                 </select>
 
@@ -188,9 +242,9 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.tecnico}
                                     onChange={handleChange}
                                     className={baseInput}>
-                                    <option value="rodrigo">Rodrigo Esquivel Bejarano</option>
-                                    <option value="javier">Javier Martínez Huerta</option>
-                                    <option value="jair">Jair Sánchez Rivera</option>
+                                    <option value="Rodrigo Esquivel Bejarano">Rodrigo Esquivel Bejarano</option>
+                                    <option value="Javier Martínez Huerta">Javier Martínez Huerta</option>
+                                    <option value="Jair Sánchez Rivera">Jair Sánchez Rivera</option>
                                 </select>
                             </div>
                         </div>
@@ -468,10 +522,10 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     onChange={handleChange}
                                     className={baseInput}
                                 >
-{/*                                     <option value="">Seleccionar...</option>
- */}                                    <option value="efectivo">Efectivo</option>
-                                    <option value="tarjeta">Tarjeta</option>
-                                    <option value="transferencia">Transferencia</option>
+                                    {/*                                     <option value="">Seleccionar...</option>
+ */}                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Tarjeta">Tarjeta</option>
+                                    <option value="Transferencia">Transferencia</option>
                                 </select>
                             </div>
 
@@ -540,6 +594,23 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                             </select>
                         </div>
                     </div>
+                    <div controlId="imagenes" className="mb-3">
+                        <label>Imágenes (opcional)</label>
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => {
+                                const files = Array.from(e.target.files);
+                                setForm({ ...form, imagenes: files });
+                            }}
+                        />
+                        {form.imagenes.length > 0 && (
+                            <div className="mt-2">
+                                <small>{form.imagenes.length} imagen(es) seleccionada(s)</small>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Botón para abrir firma */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -567,10 +638,10 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                 onClick={() => setShowFirmaTecnico(true)}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all"
                             >
-                                {form.firma ? "Ver / Editar firma" : "Firma técnico"}
+                                {form.firmaTecnico ? "Ver / Editar firma" : "Firma técnico"}
                             </button>
 
-                            {form.firma && (
+                            {form.firmaTecnico && (
                                 <img
                                     src={form.firmaTecnico}
                                     alt="Firma técnico"

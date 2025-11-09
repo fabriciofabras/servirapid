@@ -53,7 +53,7 @@ export default function ServiceOrders() {
         };
 
         fetchOrders();
-    }, []);
+    }, [open]);
 
     const [search, setSearch] = useState("");
 
@@ -155,16 +155,16 @@ export default function ServiceOrders() {
                             </div>
                             <div>
                                 <div className="font-semibold">Teléfono</div>
-                                <div>{o.telefono}</div>
+                                <div>{o.cliente.telefono}</div>
                             </div>
 
                             <div>
                                 <div className="font-semibold">Dirección</div>
-                                <div>{o.cliente.direccion}</div>
+                                <div>{o.cliente.calle} {o.cliente.noExterior} Int {o.cliente.noInterior}, {o.cliente.colonia}, {o.cliente.alcaldia}</div>
                             </div>
                             <div>
                                 <div className="font-semibold">Taller</div>
-                                <div>{o.cliente.taller}</div>
+                                <div>{o.taller}</div>
                             </div>
 
                             <div>
@@ -185,7 +185,7 @@ export default function ServiceOrders() {
                                 <div>{o.pago} {paymentIcon(o.pago)}</div>
                             </div>
 
-                            <div>
+                          {/*   <div>
                                 <div className="font-semibold">Costo Material</div>
                                 <div>${o.costoMaterial}</div>
                             </div>
@@ -193,7 +193,7 @@ export default function ServiceOrders() {
                                 <div className="font-semibold">Mano de obra</div>
                                 <div>${o.manoDeObra}</div>
                             </div>
-
+ */}
                             <div>
                                 <div className="font-semibold">Total</div>
                                 <div className="font-bold">${o.total}</div>
@@ -231,8 +231,8 @@ export default function ServiceOrders() {
                             <th className="p-2 border">Servicio</th>
                             <th className="p-2 border">Material</th>
                             <th className="p-2 border">Pago</th>
-                            <th className="p-2 border">Costo Material</th>
-                            <th className="p-2 border">Mano de obra</th>
+                            {/* <th className="p-2 border">Costo Material</th>
+                            <th className="p-2 border">Mano de obra</th> */}
                             <th className="p-2 border">Total</th>
                             <th className="p-2 border">Acciones</th>
                         </tr>
@@ -246,12 +246,12 @@ export default function ServiceOrders() {
                                 <td className="p-2 border">{o.tecnico}</td>
                                 <td className="p-2 border">{o.cliente.nombre}</td>
                                 <td className="p-2 border">{o.cliente.telefono}</td>
-                                <td className="p-2 border">{o.cliente.direccion}</td>
+                                <td className="p-2 border">{o.cliente.calle} {o.cliente.noExterior} Int {o.cliente.noInterior}, {o.cliente.colonia}, {o.cliente.alcaldia}</td>
                                 <td className="p-2 border">{o.servicio}</td>
                                 <td className="p-2 border">{o.material}</td>
                                 <td className="p-2 border text-center">{paymentIcon(o.pago)}</td>
-                                <td className="p-2 border">${o.costoMaterial}</td>
-                                <td className="p-2 border">${o.manoDeObra}</td>
+                             {/*    <td className="p-2 border">${o.costoMaterial}</td>
+                                <td className="p-2 border">${o.manoDeObra}</td> */}
                                 <td className="p-2 border font-bold">${o.total}</td>
                                 <td className="p-2 border">
                                     <div className="flex gap-2">

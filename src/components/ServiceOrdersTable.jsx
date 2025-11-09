@@ -52,7 +52,7 @@ export default function ServiceOrdersTable() {
               <td>{o.tecnico}</td>
               <td>{o.nombre}</td>
               <td>{o.telefono}</td>
-              <td>{o.direccion}</td>
+              <td>{o.calle}</td>
               <td>{o.tipoServicio}</td>
               <td>{o.material}</td>
               <td>{o.tipoPago}</td>
