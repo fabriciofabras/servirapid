@@ -38,7 +38,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         fecha: "",
         taller: "ÁLAMOS",
         tecnico: "RODRIGO ESQUIVEL BEJARANO",
-        cliente: { nombre: "", tipoId: "INE", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "" },
+        cliente: { nombre: "", tipoId: "INE", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "", correo:"" },
         auto: { placas: "", noSerie: "", marca: "", tipoAuto: "" },
         trabajo: "HOGAR",
         servicio: "",
@@ -301,6 +301,16 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                 <input
                                     name="cliente.telefono"
                                     value={form.cliente.telefono}
+                                    onChange={handleChange}
+                                    className={baseInput}
+                                    required
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className={baseLabel}>Correo</label>
+                                <input
+                                    name="cliente.correo"
+                                    value={form.cliente.correo}
                                     onChange={handleChange}
                                     className={baseInput}
                                     required

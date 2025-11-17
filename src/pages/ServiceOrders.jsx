@@ -132,9 +132,12 @@ export default function ServiceOrders() {
         XLSX.writeFile(wb, "ordenes_filtradas.xlsx");
     };
 
-    const handleDescargarPDF = async (folio) => {
+    const handleDescargarPDF = async (folio, correo) => {
+
+        console.log("folio", folio)
+        console.log("correo", correo)
         try {
-            //const response = await fetch(`https://servirapid-server.vercel.app/api/descargar-pdf/${folio}`, {
+            // 1. Descargar el PDF
             const response = await fetch(`https://servirapid-server.vercel.app/api/descargar-pdf/${folio}`, {
                 method: "GET",
             });
@@ -143,25 +146,42 @@ export default function ServiceOrders() {
                 throw new Error("No se pudo descargar el PDF");
             }
 
-            // Convertir la respuesta a blob (archivo binario)
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
 
-            // Crear enlace temporal para descargar
+            // Descargar localmente
             const a = document.createElement("a");
             a.href = url;
             a.download = `orden-${folio}.pdf`;
             document.body.appendChild(a);
             a.click();
-
-            // Limpiar el objeto URL temporal
             a.remove();
             window.URL.revokeObjectURL(url);
+
+            // 2. Enviar por correo electrónico
+            const enviarCorreo = await fetch("http://localhost:4000/api/enviar-pdf-correo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    folio,
+                    email: correo
+                })
+            });
+
+            if (!enviarCorreo.ok) {
+                throw new Error("No se pudo enviar el PDF por correo");
+            }
+
+            alert("PDF enviado por correo correctamente.");
+
         } catch (error) {
             console.error(error);
-            alert("Error al descargar el PDF");
+            alert("Error al procesar la operación.");
         }
-    }
+    };
+
 
     const parseFecha = (fecha) => {
         if (fecha.includes("/")) {
@@ -307,10 +327,10 @@ export default function ServiceOrders() {
                         {/* Botones de acción */}
                         <div className="flex gap-2 pt-2">
                             <button
-                                onClick={() => handleDescargarPDF(o.folio)}
-                                className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm"
+                                className="btn btn-primary"
+                                onClick={() => handleDescargarPDF(o.folio, o.correo)}
                             >
-                                Descargar PDF
+                                Descargar y Enviar Email
                             </button>
                         </div>
                     </div>
@@ -356,7 +376,7 @@ export default function ServiceOrders() {
                                 <td className="p-2 border">
                                     <div className="flex gap-2">
                                         <button
-                                            onClick={() => handleDescargarPDF(o.folio)}
+                                            onClick={() => handleDescargarPDF(o.folio, "fabriciofabras@gmail.com")}
                                             className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                                         >
                                             Descargar PDF
