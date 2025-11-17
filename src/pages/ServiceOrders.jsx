@@ -162,6 +162,28 @@ export default function ServiceOrders() {
             alert("Error al descargar el PDF");
         }
     }
+
+    const parseFecha = (fecha) => {
+        if (fecha.includes("/")) {
+            const [d, m, y] = fecha.split("/");
+            return new Date(`${y}-${m}-${d}`);
+        }
+        return new Date(fecha);
+    }
+
+    const ordered = [...filtered].sort((a, b) => {
+        const fechaA = parseFecha(a.fecha);
+        const fechaB = parseFecha(b.fecha);
+
+        // 1️⃣ Ordenar por fecha descendente
+        if (fechaB - fechaA !== 0) {
+            return fechaB - fechaA;
+        }
+
+        // 2️⃣ Si la fecha es igual, ordenar por folio descendente
+        return Number(b.folio) - Number(a.folio);
+    });
+
     return (
         <div className="p-4 space-y-4">
 
@@ -221,8 +243,8 @@ export default function ServiceOrders() {
             </div>
 
             {/* Tarjetas mobile */}
-            <div className="md:hidden grid gap-4">
-                {filtered.map((o) => (
+            <div className="block sm:hidden portrait:grid portrait:gap-4 landscape:hidden">
+                {ordered.map((o) => (
                     <div
                         key={o.id}
                         className="bg-white rounded-xl shadow p-4 border"
@@ -296,8 +318,8 @@ export default function ServiceOrders() {
             </div>
 
             {/* Tabla desktop */}
-            <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full border rounded-lg overflow-hidden">
+            <div className="hidden landscape:block sm:block overflow-x-auto">
+                <table className="min-w-full border rounded-lg">
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="p-2 border">#</th>
@@ -316,7 +338,7 @@ export default function ServiceOrders() {
                     </thead>
 
                     <tbody>
-                        {filtered.map((o) => (
+                        {ordered.map((o) => (
                             <tr key={o.id} className="text-sm hover:bg-gray-50">
                                 <td className="p-2 border">{o.folio}</td>
                                 <td className="p-2 border">{o.fecha}</td>
