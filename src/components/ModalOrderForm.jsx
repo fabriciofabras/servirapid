@@ -16,6 +16,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
     const [showFirma, setShowFirma] = useState(false);
     const [showFirmaTecnico, setShowFirmaTecnico] = useState(false);
     const [imagenes, setImagenes] = useState([]); // archivos seleccionados
+    const [aplicaDescuento, setAplicaDescuento] = useState(false);
 
     const handleImageChange = (e) => {
         // convierte FileList en array
@@ -23,52 +24,61 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         setImagenes(files);
     };
 
+    const handleDescuentoChange = (e) => {
+        setForm({
+            ...form,
+            descuento: e.target.checked,
+        });
+    };
+
+
 
     const [form, setForm] = useState({
         folio: "",
         fecha: "",
-        taller: "alamos",
-        tecnico: "rodrigo",
-        cliente: { nombre: "", tipoId: "", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "" },
+        taller: "ÁLAMOS",
+        tecnico: "RODRIGO ESQUIVEL BEJARANO",
+        cliente: { nombre: "", tipoId: "INE", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "" },
         auto: { placas: "", noSerie: "", marca: "", tipoAuto: "" },
-        trabajo: "hogar",
+        trabajo: "HOGAR",
         servicio: "",
         material: "",
-        pago: "efectivo",
+        pago: "EFECTIVO",
         costoMaterial: null,
         manoDeObra: null,
         total: null,
         firma: null,
         firmaTecnico: null,
         observaciones: "",
-        imagenes: []
+        imagenes: [],
+        descuento: false
 
     });
 
-   /*  const [form, setForm] = useState({
-        folio: "",
-        fecha: "2024-12-12",
-        taller: "Álamos",
-        tecnico: "Rodrigo Esquivel Bejarano",
-        cliente: { nombre: "Luis", tipoId: "INE", telefono: "5565656565", calle: "Tokio", noExterior: "303", noInterior: "6", colonia: "Portales Norte", alcaldia: "Benito Juárez" },
-        auto: { placas: "fhs12355", noSerie: "oiwjwd", marca: "ford", tipoAuto: "sedan", anio: "2024" },
-        trabajo: "hogar",
-        servicio: "2dad",
-        material: "sdas",
-        pago: "efectivo",
-        costoMaterial: 1000,
-        manoDeObra: 2000,
-        total: 3000,
-        firma: null,
-        firmaTecnico: null,
-        observaciones: "123",
-        horaAsignacion: "08:30",
-        horaTermino: "08:30",
-        horaContacto: "08:30",
-        fechaTermino: "2024-12-12",
-        calidadServicio: "Excelente",
-        imagenes: []
-    }); */
+    /*  const [form, setForm] = useState({
+         folio: "",
+         fecha: "2024-12-12",
+         taller: "Álamos",
+         tecnico: "Rodrigo Esquivel Bejarano",
+         cliente: { nombre: "Luis", tipoId: "INE", telefono: "5565656565", calle: "Tokio", noExterior: "303", noInterior: "6", colonia: "Portales Norte", alcaldia: "Benito Juárez" },
+         auto: { placas: "fhs12355", noSerie: "oiwjwd", marca: "ford", tipoAuto: "sedan", anio: "2024" },
+         trabajo: "hogar",
+         servicio: "2dad",
+         material: "sdas",
+         pago: "efectivo",
+         costoMaterial: 1000,
+         manoDeObra: 2000,
+         total: 3000,
+         firma: null,
+         firmaTecnico: null,
+         observaciones: "123",
+         horaAsignacion: "08:30",
+         horaTermino: "08:30",
+         horaContacto: "08:30",
+         fechaTermino: "2024-12-12",
+         calidadServicio: "Excelente",
+         imagenes: []
+     }); */
 
     const handleGuardarFirma = (dataURL) => {
         console.log(dataURL)
@@ -84,6 +94,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
+        const upperValue = value.toUpperCase(); // 👈 convierte a mayúsculas
+
         // Si el nombre tiene punto, es un campo anidado (ej. cliente.nombre o auto.placas)
         if (name.includes(".")) {
             const [parent, field] = name.split(".");
@@ -91,18 +103,29 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                 ...prev,
                 [parent]: {
                     ...prev[parent],
-                    [field]: value,
+                    [field]: upperValue,
                 },
             }));
         } else {
             // Si no tiene punto, es un campo normal
-            setForm((prev) => ({ ...prev, [name]: value }));
+            setForm((prev) => ({ ...prev, [name]: upperValue }));
         }
     };
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!form.firma) {
+            alert("La firma del cliente es obligatoria.");
+            return;
+        }
+        if (!form.firmaTecnico) {
+            alert("La firma del técnico es obligatoria.");
+            return;
+        }
+
+
 
         const data = new FormData();
 
@@ -216,6 +239,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.fecha}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
 
@@ -228,9 +252,9 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     className={baseInput}
                                     required
                                 >
-                                    <option value="Álamos">Álamos</option>
-                                    <option value="Echegaray">Echegaray</option>
-
+                                    <option value="ÁLAMOS">ÁLAMOS</option>
+                                    <option value="ECHEGARAY">ECHEGARAY</option>
+                                    <option value="BOSQUE REAL">BOSQUE REAL</option>
                                 </select>
 
                             </div>
@@ -242,9 +266,10 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.tecnico}
                                     onChange={handleChange}
                                     className={baseInput}>
-                                    <option value="Rodrigo Esquivel Bejarano">Rodrigo Esquivel Bejarano</option>
-                                    <option value="Javier Martínez Huerta">Javier Martínez Huerta</option>
-                                    <option value="Jair Sánchez Rivera">Jair Sánchez Rivera</option>
+                                    <option value="RODRIGO ESQUIVEL BEJARANO">RODRIGO ESQUIVEL BEJARANO</option>
+                                    <option value="JAVIER MARTÍNEZ HUERTA">JAVIER MARTÍNEZ HUERTA</option>
+                                    <option value="JAIR SÁNCHEZ RIVERA">JAIR SÁNCHEZ RIVERA</option>
+                                    <option value="WILLIAMS ESQUIVEL BEJARANO">WILLIAMS ESQUIVEL BEJARANO</option>
                                 </select>
                             </div>
                         </div>
@@ -267,6 +292,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.nombre}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
 
@@ -277,6 +303,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.telefono}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
 
@@ -287,6 +314,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.calle}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
                             <div className="flex flex-col sm:col-span-1">
@@ -296,6 +324,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.noExterior}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
                             <div className="flex flex-col sm:col-span-1">
@@ -305,6 +334,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.noInterior}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
                             <div className="flex flex-col sm:col-span-1">
@@ -314,6 +344,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.colonia}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
                             <div className="flex flex-col sm:col-span-1">
@@ -323,6 +354,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.cliente.alcaldia}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
 
@@ -336,9 +368,9 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     className={`${baseInput} bg-[url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="gray" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>')] bg-no-repeat bg-[right_0.75rem_center] pr-8`}
                                 >
                                     <option value="INE">INE</option>
-                                    <option value="Licencia">Licencia</option>
-                                    <option value="Pasaporte">Pasaporte</option>
-                                    <option value="Sin identificación">Sin identificación</option>
+                                    <option value="LICENCIA">LICENCIA</option>
+                                    <option value="PASAPORTE">PASAPORTE</option>
+                                    <option value="SIN IDENTIFICACIÓN">SIN IDENTIFICACIÓN</option>
                                 </select>
                             </div>
                         </div>
@@ -421,12 +453,12 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                 className={baseInput}
                                 required
                             >
-                                <option value="Hogar">Hogar</option>
-                                <option value="Auto">Auto</option>
+                                <option value="HOGAR">HOGAR</option>
+                                <option value="AUTO">AUTO</option>
                             </select>
                         </div>
 
-                        {form.trabajo === "Auto" && (
+                        {form.trabajo === "AUTO" && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="flex flex-col">
                                     <label className="text-sm font-medium text-gray-600 mb-1">Placas</label>
@@ -501,6 +533,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.servicio}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
 
@@ -511,6 +544,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.material}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
 
@@ -523,9 +557,9 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     className={baseInput}
                                 >
                                     {/*                                     <option value="">Seleccionar...</option>
- */}                                    <option value="Efectivo">Efectivo</option>
-                                    <option value="Tarjeta">Tarjeta</option>
-                                    <option value="Transferencia">Transferencia</option>
+ */}                                    <option value="EFECTIVO">EFECTIVO</option>
+                                    <option value="TARJETA">TARJETA</option>
+                                    <option value="TRANSFERENCIA">TRANSFERENCIA</option>
                                 </select>
                             </div>
 
@@ -559,6 +593,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     value={form.total}
                                     onChange={handleChange}
                                     className={baseInput}
+                                    required
                                 />
                             </div>
                         </div>
@@ -573,6 +608,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                 onChange={handleChange}
                                 className={`${baseInput} resize-none w-full`}
                                 rows="3"
+                                required
                             />
                         </div>
                         <div>
@@ -587,16 +623,34 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                 required
                             >
                                 <option value="">Seleccionar...</option>
-                                <option value="Excelente">Excelente</option>
-                                <option value="Bueno">Bueno</option>
-                                <option value="Regular">Regular</option>
-                                <option value="Malo">Malo</option>
+                                <option value="EXCELENTE">EXCELENTE</option>
+                                <option value="BUENO">BUENO</option>
+                                <option value="REGULAR">REGULAR</option>
+                                <option value="MALO">MALO</option>
                             </select>
                         </div>
                     </div>
+                    {/* 🔥 Casilla de descuento */}
+                    <div className="mb-6 border-2 border-red-500 p-4 rounded-lg bg-red-50 flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="descuento"
+                            checked={form.descuento}
+                            onChange={handleDescuentoChange}
+                            className="w-6 h-6 accent-red-600 cursor-pointer"
+                        />
+                        <label
+                            htmlFor="descuento"
+                            className="font-bold text-red-700 text-lg cursor-pointer"
+                        >
+                            Aplicar **10% de descuento** (solo si cumple el requisito)
+                        </label>
+                    </div>
+
                     <div controlId="imagenes" className="mb-3">
                         <label>Imágenes (opcional)</label>
                         <input
+                            required
                             type="file"
                             multiple
                             accept="image/*"
@@ -628,6 +682,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     src={form.firma}
                                     alt="Firma cliente"
                                     className="w-24 border border-gray-400 rounded-md"
+                                    required
                                 />
                             )}
                         </div>
@@ -646,6 +701,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     src={form.firmaTecnico}
                                     alt="Firma técnico"
                                     className="w-24 border border-gray-400 rounded-md"
+
                                 />
                             )}
                         </div>
