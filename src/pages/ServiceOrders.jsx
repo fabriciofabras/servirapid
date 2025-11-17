@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getOrders } from "../helpers/ordersService";
 import ModalOrderForm from "../components/ModalOrderForm";
+import * as XLSX from "xlsx";
 
 const dummyOrders = [
     {
@@ -56,14 +57,43 @@ export default function ServiceOrders() {
     }, [open]);
 
     const [search, setSearch] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
 
-    const filtered = orders.filter(
-        (o) =>
-            o.folio.toLowerCase().includes(search.toLowerCase()) ||
-            o.cliente.nombre.toLowerCase().includes(search.toLowerCase()) ||
-            o.fecha.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = orders.filter((o) => {
+        const texto = search.toLowerCase();
+        const fechaOrden = o.fecha; // formato YYYY-MM-DD
 
+        // Filtro texto
+        const matchesText =
+            o.folio.toLowerCase().includes(texto) ||
+            o.cliente.nombre.toLowerCase().includes(texto) ||
+            o.fecha.toLowerCase().includes(texto) ||
+            o.cliente.telefono.toLowerCase().includes(texto) ||
+            o.taller.toLowerCase().includes(texto) ||
+            o.tecnico.toLowerCase().includes(texto) ||
+            o.pago.toLowerCase().includes(texto)
+
+        // Filtro fecha inicial
+        const matchesFrom = fromDate ? fechaOrden >= fromDate : true;
+
+        // Filtro fecha final
+        const matchesTo = toDate ? fechaOrden <= toDate : true;
+
+        return matchesText && matchesFrom && matchesTo;
+    });
+
+    /*  const filtered = orders.filter(
+         (o) =>
+             o.folio.toLowerCase().includes(search.toLowerCase()) ||
+             o.cliente.nombre.toLowerCase().includes(search.toLowerCase()) ||
+             o.fecha.toLowerCase().includes(search.toLowerCase()) ||
+             o.cliente.telefono.toLowerCase().includes(search.toLowerCase()) ||
+             o.taller.toLowerCase().includes(search.toLowerCase()) ||
+             o.tecnico.toLowerCase().includes(search.toLowerCase()) ||
+             o.pago.toLowerCase().includes(search.toLowerCase())
+     );
+  */
     const paymentIcon = (tipo) => {
         switch (tipo.toLowerCase()) {
             case "efectivo":
@@ -75,6 +105,31 @@ export default function ServiceOrders() {
             default:
                 return "❓";
         }
+    };
+
+    const exportToExcel = () => {
+        // Usa los datos filtrados
+        const dataToExport = filtered.map((o) => ({
+            FOLIO: o.folio,
+            FECHA: o.fecha,
+            TALLER: o.taller,
+            TECNICO: o.tecnico,
+            NOMBRE: o.cliente.nombre,
+            TELEFONO: o.cliente.telefono,
+            DIRECCION: `${o.cliente.calle} ${o.cliente.noExterior} Int ${o.cliente.noInterior}, ${o.cliente.colonia}, ${o.cliente.alcaldia}`,
+            SERVICIO: o.servicio,
+            MATERIAL: o.material,
+            PAGO: o.pago,
+            TOTAL: o.total,
+        }));
+
+        // Crear hoja y libro
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Órdenes");
+
+        // Descargar archivo
+        XLSX.writeFile(wb, "ordenes_filtradas.xlsx");
     };
 
     const handleDescargarPDF = async (folio) => {
@@ -108,22 +163,55 @@ export default function ServiceOrders() {
         }
     }
     return (
-        <div className="p-4">
+        <div className="p-4 space-y-4">
+
             {/* Búsqueda */}
-            <div className="mb-4">
-                <input
-                    type="text"
-                    placeholder="Buscar por # servicio o nombre"
-                    className="w-full md:w-1/3 px-3 py-2 border rounded-lg"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
-                <button
-                    onClick={() => setOpen(true)}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-                >
-                    + Nueva Orden
-                </button>
+            <div className="space-y-3">
+
+                {/* Línea de búsqueda y botones */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+
+                    <input
+                        type="text"
+                        placeholder="Buscar por orden, cliente, taller, técnico o fecha"
+                        className="w-full md:w-1/3 px-3 py-2 border rounded-lg"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setOpen(true)}
+                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                        >
+                            + Nueva Orden
+                        </button>
+
+                        <button
+                            onClick={exportToExcel}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                        >
+                            📄 Exportar Excel
+                        </button>
+                    </div>
+                </div>
+
+                {/* Fechas */}
+                <div className="flex flex-col md:flex-row gap-2">
+                    <input
+                        type="date"
+                        className="px-3 py-2 border rounded-lg w-full md:w-auto"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                    />
+
+                    <input
+                        type="date"
+                        className="px-3 py-2 border rounded-lg w-full md:w-auto"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                    />
+                </div>
 
                 <ModalOrderForm
                     isOpen={open}
@@ -158,10 +246,11 @@ export default function ServiceOrders() {
                                 <div>{o.cliente.telefono}</div>
                             </div>
 
-                            <div>
+                            <div className="col-span-2">
                                 <div className="font-semibold">Dirección</div>
                                 <div>{o.cliente.calle} {o.cliente.noExterior} Int {o.cliente.noInterior}, {o.cliente.colonia}, {o.cliente.alcaldia}</div>
                             </div>
+
                             <div>
                                 <div className="font-semibold">Taller</div>
                                 <div>{o.taller}</div>
@@ -171,6 +260,7 @@ export default function ServiceOrders() {
                                 <div className="font-semibold">Técnico</div>
                                 <div>{o.tecnico}</div>
                             </div>
+
                             <div>
                                 <div className="font-semibold">Servicio</div>
                                 <div>{o.servicio}</div>
@@ -180,20 +270,12 @@ export default function ServiceOrders() {
                                 <div className="font-semibold">Material</div>
                                 <div>{o.material}</div>
                             </div>
+
                             <div>
                                 <div className="font-semibold">Pago</div>
                                 <div>{o.pago} {paymentIcon(o.pago)}</div>
                             </div>
 
-                          {/*   <div>
-                                <div className="font-semibold">Costo Material</div>
-                                <div>${o.costoMaterial}</div>
-                            </div>
-                            <div>
-                                <div className="font-semibold">Mano de obra</div>
-                                <div>${o.manoDeObra}</div>
-                            </div>
- */}
                             <div>
                                 <div className="font-semibold">Total</div>
                                 <div className="font-bold">${o.total}</div>
@@ -202,23 +284,20 @@ export default function ServiceOrders() {
 
                         {/* Botones de acción */}
                         <div className="flex gap-2 pt-2">
-                            <button onClick={() => handleDescargarPDF(o.folio)}
-                                className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm">
+                            <button
+                                onClick={() => handleDescargarPDF(o.folio)}
+                                className="px-3 py-1 bg-blue-500 text-white rounded-lg text-sm"
+                            >
                                 Descargar PDF
                             </button>
-                            {/* <button className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm">
-                                Eliminar
-                            </button> */}
                         </div>
                     </div>
                 ))}
             </div>
 
-
             {/* Tabla desktop */}
-
             <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full border">
+                <table className="min-w-full border rounded-lg overflow-hidden">
                     <thead className="bg-gray-100">
                         <tr>
                             <th className="p-2 border">#</th>
@@ -231,37 +310,35 @@ export default function ServiceOrders() {
                             <th className="p-2 border">Servicio</th>
                             <th className="p-2 border">Material</th>
                             <th className="p-2 border">Pago</th>
-                            {/* <th className="p-2 border">Costo Material</th>
-                            <th className="p-2 border">Mano de obra</th> */}
                             <th className="p-2 border">Total</th>
                             <th className="p-2 border">Acciones</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {filtered.map((o) => (
-                            <tr key={o.id} className="text-sm">
+                            <tr key={o.id} className="text-sm hover:bg-gray-50">
                                 <td className="p-2 border">{o.folio}</td>
                                 <td className="p-2 border">{o.fecha}</td>
                                 <td className="p-2 border">{o.taller}</td>
                                 <td className="p-2 border">{o.tecnico}</td>
                                 <td className="p-2 border">{o.cliente.nombre}</td>
                                 <td className="p-2 border">{o.cliente.telefono}</td>
-                                <td className="p-2 border">{o.cliente.calle} {o.cliente.noExterior} Int {o.cliente.noInterior}, {o.cliente.colonia}, {o.cliente.alcaldia}</td>
+                                <td className="p-2 border">
+                                    {o.cliente.calle} {o.cliente.noExterior} Int {o.cliente.noInterior}, {o.cliente.colonia}, {o.cliente.alcaldia}
+                                </td>
                                 <td className="p-2 border">{o.servicio}</td>
                                 <td className="p-2 border">{o.material}</td>
                                 <td className="p-2 border text-center">{paymentIcon(o.pago)}</td>
-                             {/*    <td className="p-2 border">${o.costoMaterial}</td>
-                                <td className="p-2 border">${o.manoDeObra}</td> */}
                                 <td className="p-2 border font-bold">${o.total}</td>
                                 <td className="p-2 border">
                                     <div className="flex gap-2">
-                                        <button onClick={() => handleDescargarPDF(o.folio)}
-                                            className="px-2 py-1 bg-blue-500 text-white rounded text-xs">
+                                        <button
+                                            onClick={() => handleDescargarPDF(o.folio)}
+                                            className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
+                                        >
                                             Descargar PDF
                                         </button>
-                                        {/* <button className="px-2 py-1 bg-red-500 text-white rounded text-xs">
-                                            Eliminar
-                                        </button> */}
                                     </div>
                                 </td>
                             </tr>
@@ -270,5 +347,6 @@ export default function ServiceOrders() {
                 </table>
             </div>
         </div>
+
     );
 }
