@@ -14,19 +14,19 @@ export default function Sidebar() {
           &#9776; {/* ← Ícono hamburguesa Unicode */}
         </button>
 
-        {open && (
+        {/* {open && (
           <div className="absolute top-16 left-0 w-48 bg-gray-200 shadow-md p-4">
             <button className="block w-full text-left p-2 hover:bg-gray-300">
               Órdenes de servicio
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Menú escritorio */}
-      <div className="hidden md:flex gap-4 p-4 bg-gray-100">
+      {/* <div className="hidden md:flex gap-4 p-4 bg-gray-100">
         <button className="hover:underline">Órdenes de servicio</button>
-      </div>
+      </div> */}
     </nav>
   );
 }
