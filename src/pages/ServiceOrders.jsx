@@ -159,7 +159,7 @@ export default function ServiceOrders() {
             window.URL.revokeObjectURL(url);
 
             // 2. Enviar por correo electrónico
-            const enviarCorreo = await fetch("http://servirapid-server.vercel.app/api/enviar-pdf-correo", {
+            const enviarCorreo = await fetch("https://servirapid-server.vercel.app/api/enviar-pdf-correo", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
