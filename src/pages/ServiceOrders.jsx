@@ -47,9 +47,12 @@ export default function ServiceOrders() {
     // Callback llamado por Google
     window.handleCredentialResponse = async (response) => {
         const token = response.credential;
-
+        console.log("token", token)
         // Decodificar token (contiene el email y nombre)
         const userInfo = JSON.parse(atob(token.split(".")[1]));
+        console.log("userInfo", userInfo)
+
+
         setUser(userInfo);
     };
 
