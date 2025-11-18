@@ -330,7 +330,7 @@ export default function ServiceOrders() {
                         <div className="flex gap-2 pt-2">
                             <button
                                 className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
-                                onClick={() => handleDescargarPDF(o.folio, o.correo)}
+                                onClick={() => handleDescargarPDF(o.folio, o.cliente.correo)}
                             >
                                 Descargar y Enviar Email
                             </button>
@@ -378,7 +378,7 @@ export default function ServiceOrders() {
                                 <td className="p-2 border">
                                     <div className="flex gap-2">
                                         <button
-                                            onClick={() => handleDescargarPDF(o.folio, o.correo)}
+                                            onClick={() => handleDescargarPDF(o.folio, o.cliente.correo)}
                                             className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                                         >
                                             Descargar PDF
