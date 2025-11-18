@@ -41,6 +41,17 @@ export default function ServiceOrders() {
     const [open, setOpen] = useState(false);
 
     const [orders, setOrders] = useState([]);
+    
+    const [user, setUser] = useState(null);
+
+    // Callback llamado por Google
+    window.handleCredentialResponse = async (response) => {
+        const token = response.credential;
+
+        // Decodificar token (contiene el email y nombre)
+        const userInfo = JSON.parse(atob(token.split(".")[1]));
+        setUser(userInfo);
+    };
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -230,13 +241,14 @@ export default function ServiceOrders() {
                         >
                             + Nueva Orden
                         </button>
-
+                        {user?.email === "servirapidcontacto@gmail.com" && (
                         <button
                             onClick={exportToExcel}
                             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
                         >
                             📄 Exportar Excel
                         </button>
+                        )}
                     </div>
                 </div>
 
