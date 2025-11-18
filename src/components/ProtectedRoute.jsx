@@ -1,17 +1,11 @@
 import { Navigate } from "react-router-dom";
-import { getGoogleAuthURL } from "../helpers/googleAuth";
 
 const ProtectedRoute = ({ children }) => {
-  const hasToken = window.location.hash.includes("access_token");
+  const token = localStorage.getItem("google_token");
 
-  if (hasToken) return children;
+  if (!token) return <Navigate to="/login" replace />;
 
-  // Permitir localhost sin login
-  if (window.location.hostname === "localhost") return children;
-
-  // Si no hay token → mandar a Google
-  window.location.href = getGoogleAuthURL();
-  return null;
+  return children;
 };
 
 export default ProtectedRoute;

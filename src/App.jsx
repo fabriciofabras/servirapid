@@ -1,16 +1,30 @@
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ServiceOrders from './pages/ServiceOrders';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./components/Login";
 
 export default function App() {
   return (
     <div>
       <Header />
-{/*       <Sidebar />
- */}      <main className="p-4 mt-20">
-        <h1 className="text-xl font-bold mb-4">Órdenes de servicio</h1>
-        <ServiceOrders />
-      </main>
+      {/*       <Sidebar />
+ */}
+
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <ServiceOrders />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }
