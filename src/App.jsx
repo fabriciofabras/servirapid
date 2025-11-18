@@ -12,19 +12,19 @@ export default function App() {
       {/*       <Sidebar />
  */}
 
-      <BrowserRouter>
+   {/*    <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute> */}
                 <ServiceOrders />
-              </ProtectedRoute>
+              {/* </ProtectedRoute>
             }
           />
         </Routes>
-      </BrowserRouter>
+      </BrowserRouter> */}
     </div>
   );
 }
