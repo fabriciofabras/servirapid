@@ -36,7 +36,7 @@ const dummyOrders = [
     },
 ];
 
-export default function ServiceOrders() {
+export default function ServiceOrders({perfil}) {
 
     const [open, setOpen] = useState(false);
 
@@ -220,7 +220,7 @@ export default function ServiceOrders() {
 
     return (
         <div className="p-4 space-y-4">
-            <main className="p-4 mt-20">
+            <main className="p-4 mt-2">
                 <h1 className="text-xl font-bold mb-4">Órdenes de servicio</h1>
             </main>
             {/* Búsqueda */}
@@ -244,7 +244,7 @@ export default function ServiceOrders() {
                         >
                             + Nueva Orden
                         </button>
-                        {user?.email === "servirapidcontacto@gmail.com" && (
+                        {perfil === "administrador" && (
                         <button
                             onClick={exportToExcel}
                             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"

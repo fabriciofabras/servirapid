@@ -2,8 +2,147 @@
 @tailwind components;
 @tailwind utilities;
 
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 .form-input {
   @apply w-full border border-gray-300 rounded-lg p-2 text-sm bg-white
   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition;
 }
 
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+body,
+html {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+        monospace;
+}
+
+.main-container {
+    min-height: 100vh;
+    /* Hace que el contenedor ocupe al menos la altura completa de la ventana */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Esto distribuye el contenido correctamente */
+
+}
+
+
+.menu-item a:hover {
+    background-color: rgb(39, 106, 199);
+
+}
+
+/* Estilo para el menú desplegable */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-width: 150px;
+}
+
+.dropdown-menu li a {
+    padding: 10px 20px;
+}
+
+.dropdown-menu li a:hover {
+    background-color: rgb(39, 106, 199);
+}
+
+/* Mostrar el menú desplegable al pasar el ratón sobre el elemento principal */
+.menu-item.dropdown:hover .dropdown-menu {
+    background-color: rgb(31 41 55);
+    display: block;
+}
+
+/* Opcional: Ajuste adicional */
+footer {
+    margin-top: auto; /* Esto empuja el footer hacia abajo solo si es necesario */
+    padding-bottom: 20px; /* Agrega espacio para el contenido final sin generar scroll */
+}
+/* Fija la sección del título, búsqueda y botón */
+
+  /* Hacer que la tabla tenga un área de desplazamiento */
+  .scrollable-section {
+    max-height: calc(100vh - 270px); /* Ajustar según la altura de la sección fija */
+    overflow-y: auto;
+  }
+  
+/* Aplica al encabezado (fila de th) */
+thead th {
+    position: sticky;
+    top: 0; /* Fija la fila de encabezado en la parte superior al hacer scroll vertical */
+    z-index: 3; /* Mayor valor para que esté por encima de las celdas */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional para un efecto visual */
+  }
+  
+  /* Aplica a la primera columna de cada fila */
+  th:first-child, td:first-child {
+    position: sticky;
+    left: 0; /* Fija la primera columna en el borde izquierdo al hacer scroll horizontal */
+    z-index: 2; /* Menor valor que el encabezado, pero mayor que las otras celdas */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sombra opcional para un mejor efecto */
+  }
+
+  thead th:first-child {
+    position: sticky;
+    top: 0; /* Fija el encabezado en la parte superior */
+    left: 0; /* Fija también la primera columna al borde izquierdo */
+    z-index: 4; /* Valor más alto para que esté sobre el resto del contenido */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Sombra opcional */
+  }
