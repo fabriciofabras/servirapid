@@ -1,5 +1,3 @@
-import { URL_SERVER } from "../properties";
-
 export const validateUser = (formData,confirmNewSession, user) => {
 
   console.log("validateUser->confirmNewSesion", confirmNewSession, user, formData)
