@@ -36,12 +36,12 @@ const dummyOrders = [
     },
 ];
 
-export default function ServiceOrders({perfil}) {
+export default function ServiceOrders({ perfil }) {
 
     const [open, setOpen] = useState(false);
 
     const [orders, setOrders] = useState([]);
-    
+
     const [user, setUser] = useState(null);
 
     // Callback llamado por Google
@@ -146,6 +146,27 @@ export default function ServiceOrders({perfil}) {
         XLSX.writeFile(wb, "ordenes_filtradas.xlsx");
     };
 
+    const handleEnviarPDF = async (folio, correo) => {
+
+        // 2. Enviar por correo electrónico
+        const enviarCorreo = await fetch("https://servirapid-server.vercel.app/api/enviar-pdf-correo", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                folio,
+                email: correo
+            })
+        });
+
+        if (!enviarCorreo.ok) {
+            throw new Error("No se pudo enviar el PDF por correo");
+        }
+
+        alert("PDF enviado por correo correctamente.");
+
+    }
     const handleDescargarPDF = async (folio, correo) => {
 
         console.log("folio", folio)
@@ -172,23 +193,7 @@ export default function ServiceOrders({perfil}) {
             a.remove();
             window.URL.revokeObjectURL(url);
 
-            // 2. Enviar por correo electrónico
-            const enviarCorreo = await fetch("https://servirapid-server.vercel.app/api/enviar-pdf-correo", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    folio,
-                    email: correo
-                })
-            });
 
-            if (!enviarCorreo.ok) {
-                throw new Error("No se pudo enviar el PDF por correo");
-            }
-
-            alert("PDF enviado por correo correctamente.");
 
         } catch (error) {
             console.error(error);
@@ -245,12 +250,12 @@ export default function ServiceOrders({perfil}) {
                             + Nueva Orden
                         </button>
                         {perfil === "administrador" && (
-                        <button
-                            onClick={exportToExcel}
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-                        >
-                            📄 Exportar Excel
-                        </button>
+                            <button
+                                onClick={exportToExcel}
+                                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                            >
+                                📄 Exportar Excel
+                            </button>
                         )}
                     </div>
                 </div>
@@ -347,7 +352,16 @@ export default function ServiceOrders({perfil}) {
                                 className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                                 onClick={() => handleDescargarPDF(o.folio, o.cliente.correo)}
                             >
-                                Descargar y Enviar Email
+                                Descargar PDF
+                            </button>
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                            <button
+                                className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
+                                onClick={() => handleEnviarPDF(o.folio, o.cliente.correo)}
+                            >
+                                Enviar PDF
                             </button>
                         </div>
                     </div>
@@ -397,6 +411,14 @@ export default function ServiceOrders({perfil}) {
                                             className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                                         >
                                             Descargar PDF
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-2 pt-2">
+                                        <button
+                                            className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
+                                            onClick={() => handleEnviarPDF(o.folio, o.cliente.correo)}
+                                        >
+                                            Enviar PDF
                                         </button>
                                     </div>
                                 </td>

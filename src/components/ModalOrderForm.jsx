@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { addOrder } from "../helpers/ordersService";
 import FirmaDigital from "./FirmaDigital";
 import { Button, Modal } from "react-bootstrap";
+import imageCompression from "browser-image-compression";
 
 export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
     const API_BASE_URL = import.meta.env.VITE_API_URL || "https://servirapid-server.vercel.app";
@@ -38,7 +39,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         fecha: "",
         taller: "ÁLAMOS",
         tecnico: "RODRIGO ESQUIVEL BEJARANO",
-        cliente: { nombre: "", tipoId: "INE", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "", correo:"" },
+        cliente: { nombre: "", tipoId: "INE", telefono: "", calle: "", noExterior: "", noInterior: "", colonia: "", alcaldia: "", correo: "" },
         auto: { placas: "", noSerie: "", marca: "", tipoAuto: "" },
         trabajo: "HOGAR",
         servicio: "",
@@ -79,6 +80,23 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
          calidadServicio: "Excelente",
          imagenes: []
      }); */
+
+    async function compressImage(file) {
+        const options = {
+            maxSizeMB: 0.5,              // Tamaño máximo final ~500KB
+            maxWidthOrHeight: 1600,      // Para fotos verticales
+            useWebWorker: true,
+            initialQuality: 0.7          // Ajusta calidad para bajar peso
+        };
+
+        try {
+            const compressedFile = await imageCompression(file, options);
+            return compressedFile;
+        } catch (error) {
+            console.error("Error al comprimir imagen:", error);
+            return file; // fallback si algo falla
+        }
+    }
 
     const handleGuardarFirma = (dataURL) => {
         console.log(dataURL)
@@ -149,6 +167,16 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                 data.append("imagenes", file);
             });
         }
+
+        if (form.imagenes && form.imagenes.length > 0) {
+            const compressPromises = form.imagenes.map(async (file) => {
+                const compressed = await compressImage(file);
+                data.append("imagenes", compressed);
+            });
+
+            await Promise.all(compressPromises);
+        }
+
         try {
 
             // 2️⃣ Genera el PDF
