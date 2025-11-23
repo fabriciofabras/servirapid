@@ -161,12 +161,12 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         data.append("cliente", JSON.stringify(form.cliente));
         data.append("auto", JSON.stringify(form.auto));
 
-        // === 3️⃣ Agregar las imágenes (si hay)
+        /* // === 3️⃣ Agregar las imágenes (si hay)
         if (form.imagenes && form.imagenes.length > 0) {
             form.imagenes.forEach((file) => {
                 data.append("imagenes", file);
             });
-        }
+        } */
 
         if (form.imagenes && form.imagenes.length > 0) {
             const compressPromises = form.imagenes.map(async (file) => {
