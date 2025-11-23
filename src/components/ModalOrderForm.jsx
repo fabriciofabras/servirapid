@@ -83,8 +83,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
 
     async function compressImage(file) {
         const options = {
-            maxSizeMB: 0.5,              // Tamaño máximo final ~500KB
-            maxWidthOrHeight: 1600,      // Para fotos verticales
+            maxSizeMB: 0.25,              // Tamaño máximo final ~500KB
+            maxWidthOrHeight: 800,      // Para fotos verticales
             useWebWorker: true,
             initialQuality: 0.7          // Ajusta calidad para bajar peso
         };
