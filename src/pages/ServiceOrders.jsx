@@ -134,6 +134,7 @@ export default function ServiceOrders({ perfil }) {
             SERVICIO: o.servicio,
             MATERIAL: o.material,
             PAGO: o.pago,
+            COSTOMATERIAL: o.costoMaterial,
             TOTAL: o.total,
         }));
 
@@ -211,16 +212,10 @@ export default function ServiceOrders({ perfil }) {
     }
 
     const ordered = [...filtered].sort((a, b) => {
-        const fechaA = parseFecha(a.fecha);
-        const fechaB = parseFecha(b.fecha);
+        const numA = parseInt(a.folio.replace("OR-", ""), 10);
+        const numB = parseInt(b.folio.replace("OR-", ""), 10);
 
-        // 1️⃣ Ordenar por fecha descendente
-        if (fechaB - fechaA !== 0) {
-            return fechaB - fechaA;
-        }
-
-        // 2️⃣ Si la fecha es igual, ordenar por folio descendente
-        return Number(b.folio) - Number(a.folio);
+        return numB - numA; // Descendente
     });
 
     return (
@@ -390,7 +385,7 @@ export default function ServiceOrders({ perfil }) {
 
                     <tbody>
                         {ordered.map((o) => (
-                            <tr key={o.id} className="text-sm hover:bg-gray-50">
+                            <tr key={o.id} className="text-sm hover:bg-gray-100 odd:bg-gray-200 even:bg-white hover:bg-gray-100 transition">
                                 <td className="p-2 border">{o.folio}</td>
                                 <td className="p-2 border">{o.fecha}</td>
                                 <td className="p-2 border">{o.taller}</td>

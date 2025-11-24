@@ -18,6 +18,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
     const [showFirmaTecnico, setShowFirmaTecnico] = useState(false);
     const [imagenes, setImagenes] = useState([]); // archivos seleccionados
     const [aplicaDescuento, setAplicaDescuento] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [messageLoading, setMessageLoading] = useState("");
 
     const handleImageChange = (e) => {
         // convierte FileList en array
@@ -167,7 +169,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                 data.append("imagenes", file);
             });
         } */
-
+        setLoading(true); // 🔵 Mostrar loading
+        setMessageLoading("Comprimiendo imágenes…")
         if (form.imagenes && form.imagenes.length > 0) {
             const compressPromises = form.imagenes.map(async (file) => {
                 const compressed = await compressImage(file);
@@ -177,7 +180,10 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
             await Promise.all(compressPromises);
         }
 
+
+
         try {
+            setMessageLoading("Generando Orden…")
 
             // 2️⃣ Genera el PDF
             await fetch(`${API_BASE_URL}/api/generar-pdf`, {
@@ -186,8 +192,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
  */                body: data,
             });
 
-            // 3️⃣ Cierra modal y refresca una sola vez
-            // ✅ Primero refresca los datos, luego cierra el modal
+            setLoading(false); // 🔵 Mostrar loading
+
             if (onSuccess) await onSuccess();
             onClose();
         } catch (error) {
@@ -200,6 +206,23 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
 
     return (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto p-4 md:rounded-2xl md:w-[600px] md:mx-auto md:mt-10">
+            {loading && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-2xl shadow-xl flex flex-col items-center gap-4 w-72">
+
+                        {/* Spinner */}
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+
+                        <p className="text-lg font-semibold text-gray-700">
+                            { messageLoading }
+                        </p>
+
+                        <p className="text-sm text-gray-500 text-center">
+                            Esto puede tardar unos segundos
+                        </p>
+                    </div>
+                </div>
+            )}
             <div className="flex justify-between items-center border-b pb-2">
                 {/*                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">Nueva Orden</h2>
  */}
