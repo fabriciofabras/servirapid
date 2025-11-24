@@ -34,9 +34,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         });
     };
 
-
-
-    const [form, setForm] = useState({
+    const initialForm = {
         folio: "",
         fecha: "",
         taller: "ÁLAMOS",
@@ -56,7 +54,10 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         imagenes: [],
         descuento: false
 
-    });
+    }
+
+    const [form, setForm] = useState(initialForm);
+
 
     /*  const [form, setForm] = useState({
          folio: "",
@@ -192,7 +193,8 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
  */                body: data,
             });
 
-            setLoading(false); // 🔵 Mostrar loading
+            setLoading(false); // Mostrar loading
+            setForm(initialForm);
 
             if (onSuccess) await onSuccess();
             onClose();
@@ -214,7 +216,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
 
                         <p className="text-lg font-semibold text-gray-700">
-                            { messageLoading }
+                            {messageLoading}
                         </p>
 
                         <p className="text-sm text-gray-500 text-center">
