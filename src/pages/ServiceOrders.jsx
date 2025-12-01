@@ -38,6 +38,8 @@ const dummyOrders = [
 
 export default function ServiceOrders({ perfil }) {
 
+    const API_BASE_URL = import.meta.env.VITE_API_URL || "https://servirapid-server.vercel.app";
+
     const [open, setOpen] = useState(false);
 
     const [orders, setOrders] = useState([]);
