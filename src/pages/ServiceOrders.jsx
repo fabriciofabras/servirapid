@@ -121,6 +121,62 @@ export default function ServiceOrders({ perfil }) {
         }
     };
 
+    /*  const exportToExcel = () => {
+         // Usa los datos filtrados
+         const dataToExport = filtered.map((o) => ({
+             FOLIO: o.folio,
+             FECHA: o.fecha,
+             TALLER: o.taller,
+             TECNICO: o.tecnico,
+             NOMBRE: o.cliente.nombre,
+             TELEFONO: o.cliente.telefono,
+             DIRECCION: `${o.cliente.calle} ${o.cliente.noExterior} Int ${o.cliente.noInterior}, ${o.cliente.colonia}, ${o.cliente.alcaldia}`,
+             SERVICIO: o.servicio,
+             MATERIAL: o.material,
+             PAGO: o.pago,
+             COSTOMATERIAL: o.costoMaterial,
+             COSTOMANODEOBRA: o.costoManoObra,
+             TOTAL: o.total,
+         }));
+ 
+         // Crear hoja y libro
+         const ws = XLSX.utils.json_to_sheet(dataToExport);
+         const wb = XLSX.utils.book_new();
+         XLSX.utils.book_append_sheet(wb, ws, "Órdenes");
+ 
+         // Descargar archivo
+         XLSX.writeFile(wb, "ordenes_filtradas.xlsx");
+     }; */
+
+    const handleMarcarPagado = async (folio) => {
+        const ok = confirm("¿Confirmas que este folio ha sido pagado? Esta acción no se puede deshacer.");
+
+        if (!ok) return;
+
+        try {
+            const resp = await fetch(`${API_BASE_URL}/api/marcar-pagado/${folio}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" }
+            });
+
+            const data = await resp.json();
+
+            if (resp.ok) {
+                // actualiza estado local (dependiendo de tu código)
+                setOrders(prev =>
+                    prev.map(item =>
+                        item.folio === folio ? { ...item, pagado: true } : item
+                    )
+                );
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error de conexión.");
+        }
+    };
+
     const exportToExcel = () => {
         // Usa los datos filtrados
         const dataToExport = filtered.map((o) => ({
@@ -135,15 +191,50 @@ export default function ServiceOrders({ perfil }) {
             MATERIAL: o.material,
             PAGO: o.pago,
             COSTOMATERIAL: o.costoMaterial,
+            COSTOMANODEOBRA: o.costoManoObra,
             TOTAL: o.total,
         }));
 
-        // Crear hoja y libro
+        // Crear hoja base
         const ws = XLSX.utils.json_to_sheet(dataToExport);
+
+        // === AGREGAR COLUMNA DE FORMULA "UTILIDAD" ===
+        const range = XLSX.utils.decode_range(ws["!ref"]);
+
+        // Ubicar columnas por índice según el orden en dataToExport
+        const colTotal = 12;           // TOTAL es la columna 12 (A=0)
+        const colCostoMat = 10;        // COSTOMATERIAL
+        const colCostoMano = 11;       // COSTOMANODEOBRA
+        const colUtilidad = range.e.c + 1; // Nueva columna al final
+
+        // Agregar encabezado "UTILIDAD"
+        const headerCellRef = XLSX.utils.encode_cell({ r: 0, c: colUtilidad });
+        ws[headerCellRef] = { t: "s", v: "UTILIDAD" };
+
+        // Agregar fórmulas fila por fila
+        for (let row = 1; row <= range.e.r; row++) {
+            const excelRow = row + 1; // Excel empieza en 1
+
+            const totalRef = XLSX.utils.encode_col(colTotal) + excelRow;
+            const costoMatRef = XLSX.utils.encode_col(colCostoMat) + excelRow;
+            const costoManoRef = XLSX.utils.encode_col(colCostoMano) + excelRow;
+
+            const cellRef = XLSX.utils.encode_cell({ r: row, c: colUtilidad });
+
+            ws[cellRef] = {
+                t: "n",
+                f: `${totalRef} - ${costoMatRef} - ${costoManoRef}`
+            };
+        }
+
+        // Actualizar rango
+        range.e.c = colUtilidad;
+        ws["!ref"] = XLSX.utils.encode_range(range);
+
+        // Crear libro y descargar
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Órdenes");
 
-        // Descargar archivo
         XLSX.writeFile(wb, "ordenes_filtradas.xlsx");
     };
 
@@ -359,6 +450,23 @@ export default function ServiceOrders({ perfil }) {
                                 Enviar PDF
                             </button>
                         </div>
+                        <div className="flex gap-2 pt-2">
+                            {!o.pagado ? (
+                                <button
+                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                    onClick={() => handleMarcarPagado(o.folio)}
+                                >
+                                    Marcar como pagado
+                                </button>
+                            ) : (
+                                <button
+                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs cursor-not-allowed"
+                                    disabled
+                                >
+                                    Pagado ✔
+                                </button>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -415,6 +523,23 @@ export default function ServiceOrders({ perfil }) {
                                         >
                                             Enviar PDF
                                         </button>
+                                    </div>
+                                    <div className="flex gap-2 pt-2">
+                                        {!o.pagado ? (
+                                            <button
+                                                className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                                onClick={() => handleMarcarPagado(o.folio)}
+                                            >
+                                                Marcar como pagado
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="px-2 py-1 bg-gray-400 text-white rounded text-xs cursor-not-allowed"
+                                                disabled
+                                            >
+                                                Pagado ✔
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

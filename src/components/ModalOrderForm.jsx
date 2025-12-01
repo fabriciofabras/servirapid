@@ -46,6 +46,7 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
         material: "",
         pago: "EFECTIVO",
         costoMaterial: null,
+        costoManoObra: null,
         manoDeObra: null,
         total: null,
         firma: null,
