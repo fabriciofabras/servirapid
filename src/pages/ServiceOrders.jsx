@@ -452,23 +452,24 @@ export default function ServiceOrders({ perfil }) {
                                 Enviar PDF
                             </button>
                         </div>
-                        <div className="flex gap-2 pt-2">
-                            {!o.pagado ? (
-                                <button
-                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                                    onClick={() => handleMarcarPagado(o.folio)}
-                                >
-                                    Marcar como pagado
-                                </button>
-                            ) : (
-                                <button
-                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs cursor-not-allowed"
-                                    disabled
-                                >
-                                    Pagado ✔
-                                </button>
-                            )}
-                        </div>
+                        {perfil === "administrador" && (
+                            <div className="flex gap-2 pt-2">
+                                {!o.pagado ? (
+                                    <button
+                                        className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                        onClick={() => handleMarcarPagado(o.folio)}
+                                    >
+                                        Marcar como pagado
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="px-2 py-1 bg-gray-400 text-white rounded text-xs cursor-not-allowed"
+                                        disabled
+                                    >
+                                        Pagado ✔
+                                    </button>
+                                )}
+                            </div>)}
                     </div>
                 ))}
             </div>
@@ -526,23 +527,24 @@ export default function ServiceOrders({ perfil }) {
                                             Enviar PDF
                                         </button>
                                     </div>
-                                    <div className="flex gap-2 pt-2">
-                                        {!o.pagado ? (
-                                            <button
-                                                className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                                                onClick={() => handleMarcarPagado(o.folio)}
-                                            >
-                                                Marcar como pagado
-                                            </button>
-                                        ) : (
-                                            <button
-                                                className="px-2 py-1 bg-gray-400 text-white rounded text-xs cursor-not-allowed"
-                                                disabled
-                                            >
-                                                Pagado ✔
-                                            </button>
-                                        )}
-                                    </div>
+                                    {perfil === "administrador" && (
+                                        <div className="flex gap-2 pt-2">
+                                            {!o.pagado ? (
+                                                <button
+                                                    className="px-2 py-1 bg-green-500 text-white rounded text-xs"
+                                                    onClick={() => handleMarcarPagado(o.folio)}
+                                                >
+                                                    Marcar como pagado
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="px-2 py-1 bg-gray-400 text-white rounded text-xs cursor-not-allowed"
+                                                    disabled
+                                                >
+                                                    Pagado ✔
+                                                </button>
+                                            )}
+                                        </div>)}
                                 </td>
                             </tr>
                         ))}
