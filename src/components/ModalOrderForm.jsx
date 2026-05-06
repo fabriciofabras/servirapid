@@ -324,6 +324,9 @@ export default function ModalOrderForm({ isOpen, onClose, onSuccess }) {
                                     <option value="JAVIER MARTÍNEZ HUERTA">JAVIER MARTÍNEZ HUERTA</option>
                                     <option value="JAIR SÁNCHEZ RIVERA">JAIR SÁNCHEZ RIVERA</option>
                                     <option value="WILLIAMS ESQUIVEL BEJARANO">WILLIAMS ESQUIVEL BEJARANO</option>
+                                    <option value="CARLOS ORTÍZ LOZADA">CARLOS ORTÍZ LOZADA</option>
+                                    <option value="IKE ASISTENCIA">IKE ASISTENCIA</option>
+                                    <option value="WILLIAM ESQUIVEL MORALES">WILLIAM ESQUIVEL MORALES</option>
                                 </select>
                             </div>
                         </div>
